@@ -1,15 +1,17 @@
 var test = require("tap").test;
 var Q = require('../node_modules/q');
-var OrientDb = require('../lib/OrientDb');
+var OrientDb = require('../lib/OrientDb').Connection;
 var config = require('../config/test');
 
-function pass(t, msg) { return function() { t.ok(true, msg); }; }
-function fail(t, msg) { return function() { t.ok(false, msg); }; }
 
-test('unauthorized connect', function (t) {
+function pass(t, msg) { return function() { t.ok(true, msg); }; }
+function fail(t, msg) { return function() { t.ok(false, msg); t.end(); }; }
+
+
+test('incorrect connect', function (t) {
   t.plan(1);
 
-  var db = new OrientDb.Connection({
+  var db = new OrientDb({
     host: "http://localhost:2480",
     user: "admin",
     password: "wrong password",
@@ -22,117 +24,120 @@ test('unauthorized connect', function (t) {
   }, function(statusCode, body) {
     t.equal(statusCode, 401, 'should return 401 Unauthorized');
   });
-
 });
 
-test('connect & disconnect', function (t) {
-  t.plan(2);
 
-  var db = new OrientDb.Connection(config);
+var db = new OrientDb(config); // global
+
+
+test('connect', function (t) {
   db.connect().then(function() {
     t.ok(true, 'should connect to orientdb');
-
-    db.disconnect().then(function() {
-      t.ok(true, 'should disconnect from orientdb');
-    }, fail(t, 'should disconnect from orientdb'));
-
+    t.ok(db._classes, 'should retrieve db classes');
+    t.ok(db.getClass('E') instanceof Function, 'should a sub of OClass');
+    t.end();
   }, function() {
-    t.fail('should connect to orientdb with proper config');
     t.bailout('bailing out of tests, db connection failed');
     t.end();
   });
-
 });
+
 
 test('command', function (t) {
   t.plan(1);
-
-  var db = new OrientDb.Connection(config);
-  db.connect().then(function() {
-
-    t.test('insert query', function (t) {
-      t.plan(1);
-      db.command("insert into V set name = 'batman' ").then(pass(t, 'should insert vertex'), fail(t, 'should insert vertex'));
-    });
-
-    db.disconnect();
-
-  });
+  db.command("insert into V set name = 'batman' ").then(
+    pass(t, 'should insert vertex'),
+    fail(t, 'should insert vertex')
+  );
 });
 
 
-test('vertices', function (t) {
+test('create vertex', function (t) {
+  var Vertex = db.getClass('V');
+  var hero = new Vertex({ name: 'Batman' });
+  hero.set('color', 'black');
+  hero.save().then(function(hero) {
+    t.ok(hero, 'should return instance');
+    t.ok(hero instanceof Vertex, 'should be instance of Vertex');
+    t.equal(hero.get('name'), 'Batman', 'should have correct property by init');
+    t.equal(hero.get('color'), 'black', 'should have correct property by setter');
+    t.end();
+  }, fail(t, 'should create vertex'));
+});
 
-  var db = new OrientDb.Connection(config);
+/*
+test('find vertices', function (t) {
 
-  db.connect().then(function() {
+  Vertex.get(hero.get()).then(function(heros) {
+    t.ok(heros instanceof Array, 'should return array of vertices');
+    t.ok(hero[0] instanceof Vertex, 'item should be instance of Vertex');
+    t.equal(hero[0].get('name'), 'batman', 'should find right vertex');
+    t.end();
+  }, fail(t, 'should find vertex'));
 
-    pass(t, 'make connection');
+});
 
-    var Vertex = OrientDb.Vertex;
+test('load vertex', function (t) {
 
-    t.test('create vertex', function (t) {
-      t.plan(1);
+  Vertex.get().then(function(hero) {
+    t.ok(hero instanceof Vertex, 'should be instance of Vertex');
+    t.equal(hero.get('name'), 'batman', 'should find right vertex');
+    t.end();
+  }, fail(t, 'should find vertex'));
 
-      var hero = new Vertex({ name: 'batman' });
-      hero.commitTo(db).then(pass(t), fail(t, 'should create vertex'));
-    });
+});
 
-    /*
-    t.test('find vertex', function (t) {
-      t.plan(3);
+test('update vertex', function (t) {
+  t.plan(1);
 
-      Vertex.find({ name: 'batman' }).then(function(heros) {
-        t.ok(heros instanceof Array, 'should return array of vertices');
-        t.ok(hero[0] instanceof Vertex, 'item should be instance of Vertex');
-        t.equal(hero[0].get('name'), 'batman', 'should find right vertex');
-      }, fail(t, 'should find vertex'));
-    });
+  Vertex.update({ name: 'batman' }, { name: 'bruce'}).then(function(hero) {
+    t.ok(hero, 'should return vertex');
+    t.equal(hero.get('name'), 'bruce', 'should find right vertex');
+  });
+});
 
-    t.test('update vertex', function (t) {
-      t.plan(1);
+test('connect two vertices', function (t) {
+  var batman = new Vertex({ name: 'batman' });
 
-      Vertex.update({ name: 'batman' }, { name: 'bruce'}).then(function(hero) {
-        t.ok(hero, 'should return vertex');
-        t.equal(hero.get('name'), 'bruce', 'should find right vertex');
-      });
-    });
+  var robin = new Vertex({ name: 'robin' });
 
-    t.test('connect two vertices', function (t) {
-      var batman = new Vertex({ name: 'batman' });
+  Q.when(batman.commit(), robin.commit(), function(v1, v2) {
+    var rel = new Edge(v1, v2, { label: 'teaches' });
+    rel.commit().then(pass(t), fail(t, 'should create edge'));
+  });
+});
 
-      var robin = new Vertex({ name: 'robin' });
+test('connect two vertices by promises', function (t) {
+  var batman = new Vertex({ name: 'batman' });
 
-      Q.when(batman.commit(), robin.commit(), function(v1, v2) {
-        var rel = new Edge(v1, v2, { label: 'teaches' });
-        rel.commit().then(pass(t), fail(t, 'should create edge'));
-      });
-    });
+  var robin = new Vertex({ name: 'robin' });
 
-    t.test('connect two vertices by promises', function (t) {
-      var batman = new Vertex({ name: 'batman' });
+  var rel = new Edge(batman.commit(), robin.commit(), { label: 'teaches' });
+  rel.commit().then(pass(t), fail(t, 'should create edge'));
+});
 
-      var robin = new Vertex({ name: 'robin' });
+test('create extended vertex', function (t) {
+  t.plan(1);
 
-      var rel = new Edge(batman.commit(), robin.commit(), { label: 'teaches' });
-      rel.commit().then(pass(t), fail(t, 'should create edge'));
-    });
+  var heroSchema = new Schema({
+    _extends: 'V',
+    name: String
+  });
 
-    t.test('create extended vertex', function (t) {
-      t.plan(1);
+  db.syncClass('Hero', heroSchema, { silent: true }).then(function(Hero) {
+    var superman = new Hero({ name: 'superman' });
+    superman.commit().then(pass(t), fail(t, 'should create extended vertex'));
+  });
+});
+*/
 
-      var heroSchema = new Schema({
-        _extends: 'V',
-        name: String
-      });
 
-      db.syncClass('Hero', heroSchema, { silent: true }).then(function(Hero) {
-        var superman = new Hero({ name: 'superman' });
-        superman.commit().then(pass(t), fail(t, 'should create extended vertex'));
-      });
-    });
-    */
-
-    db.disconnect();
-  }, fail(t, 'no connection'));
+test('disconnect', function (t) {
+  db.disconnect().then(function() {
+    t.ok(true, 'should disconnect');
+    t.end();
+  }, function() {
+    t.ok(false, 'should disconnect');
+    t.end();
+  });
 });
