@@ -1,0 +1,22 @@
+{
+  "name": "node-orientdb-http",
+  "version": "0.0.1",
+  "description": "A node.js driver for OrientDB using the OrientDB RESTful HTTP protocol",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap test/*.js"
+  },
+  "devDependencies": {
+    "tap": "~0.2.4"
+  },
+  "dependencies": {
+    "request": "*",
+    "q": "~0.9.6"
+  },
+  "repository": "",
+  "keywords": [
+    "orientdb"
+  ],
+  "author": "Max Meinders",
+  "license": "MIT"
+}
