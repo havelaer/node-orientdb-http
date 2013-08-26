@@ -129,17 +129,32 @@ var OClass = exports.OClass = Base.sub('OClass', {
     var attrs = [];
     var changed;
     var d = Q.defer();
+    var val;
 
-    if (this.get('rid')) {
-      query = 'update ' + this.get('rid') + ' set ' + attrs.join();
+    if (this.get('@rid')) {
       changed = this.changed();
       for(attr in changed) {
-        attrs.push(attr + "='" + this.get(attr) + "'");
+        val = changed[attr];
+        switch(typeof val) {
+          case 'number':
+            attrs.push(attr + "=" + val);
+            break;
+          default:
+            attrs.push(attr + "='" + val + "'");
+        }
       }
+      query = 'update ' + this.get('@rid') + ' set ' + attrs.join();
     } else {
       changed = this.attrs();
       for(attr in changed) {
-        attrs.push(attr + "='" + this.get(attr) + "'");
+        val = changed[attr];
+        switch(typeof val) {
+          case 'number':
+            attrs.push(attr + "=" + val);
+            break;
+          default:
+            attrs.push(attr + "='" + val + "'");
+        }
       }
       query = 'insert into ' + this.constructor.name + ' set ' + attrs.join();
     }
@@ -148,7 +163,7 @@ var OClass = exports.OClass = Base.sub('OClass', {
       if (!body.result) d.reject('no result');
       self.set(body.result[0]);
       d.resolve(self);
-    }, function(err) {
+    }, function(err, body) {
       d.reject(err);
     });
     return d.promise;
