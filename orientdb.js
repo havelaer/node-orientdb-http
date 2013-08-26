@@ -1,4 +1,4 @@
-var Base = require('./Base');
+var Base = require('./lib/Base');
 var request = require('request');
 var Q = require('q');
 

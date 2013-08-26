@@ -1,6 +1,6 @@
 var test = require("tap").test;
 var Q = require('../node_modules/q');
-var OrientDb = require('../lib/OrientDb').Connection;
+var OrientDb = require('../orientdb').Connection;
 var config = require('../config/test');
 
 
@@ -57,6 +57,10 @@ test('create vertex', function (t) {
   var Vertex = db.getClass('V');
   var hero = new Vertex({ name: 'Batman' });
   hero.set('color', 'black');
+  hero.set({
+    'transport': 'batmobile',
+    'number': 8
+  });
   hero.save().then(function(hero) {
     t.ok(hero, 'should return instance');
     t.ok(hero instanceof Vertex, 'should be instance of Vertex');
@@ -65,6 +69,9 @@ test('create vertex', function (t) {
     console.log(rid);
     t.equal(hero.get('name'), 'Batman', 'should have correct property by init');
     t.equal(hero.get('color'), 'black', 'should have correct property by setter');
+    t.equal(hero.get('transport'), 'batmobile', 'should have correct property by hash');
+    t.equal(typeof hero.get('number'), 'number', 'should have correct property by type');
+    t.equal(hero.get('number'), 8, 'should have correct property by type #2');
     t.end();
   }, fail(t, 'should create vertex'));
 });
@@ -82,6 +89,23 @@ test('load vertex', function (t) {
 });
 
 
+test('update vertex', function (t) {
+  var Vertex = db.getClass('V');
+  Vertex.get(rid).then(function(hero) {
+    hero.set('color', 'red');
+    hero.set('logo', 'Bat');
+    hero.save().then(function(hero) {
+      t.ok(hero instanceof Vertex, 'should be instance of Vertex');
+      t.equal(hero.get('@rid'), rid, 'should get right vertex');
+      t.equal(hero.get('name'), 'Batman', 'should have correct unchanged properties');
+      t.equal(hero.get('color'), 'red', 'should have correct changed properties');
+      t.equal(hero.get('logo'), 'Bat', 'should have correct new properties');
+      t.end();
+    });
+  }, fail(t, 'should find vertex'));
+});
+
+
 /*
 test('find vertices', function (t) {
   Vertex.get(hero.get()).then(function(heros) {
@@ -92,13 +116,6 @@ test('find vertices', function (t) {
   }, fail(t, 'should find vertex'));
 });
 
-test('load vertex', function (t) {
-  Vertex.get().then(function(hero) {
-    t.ok(hero instanceof Vertex, 'should be instance of Vertex');
-    t.equal(hero.get('name'), 'batman', 'should find right vertex');
-    t.end();
-  }, fail(t, 'should find vertex'));
-});
 
 test('update vertex', function (t) {
   t.plan(1);
