@@ -46,7 +46,7 @@ test('connect', function (t) {
 
 test('command', function (t) {
   t.plan(1);
-  db.command("insert into V set name = 'batman' ").then(
+  db.command("insert into V set name = 'Robin' ").then(
     pass(t, 'should insert vertex'),
     fail(t, 'should insert vertex')
   );
@@ -61,18 +61,22 @@ test('create vertex', function (t) {
     t.ok(hero, 'should return instance');
     t.ok(hero instanceof Vertex, 'should be instance of Vertex');
     t.ok(hero.get('@rid'), 'should have rid');
+    rid = hero.get('@rid');
+    console.log(rid);
     t.equal(hero.get('name'), 'Batman', 'should have correct property by init');
     t.equal(hero.get('color'), 'black', 'should have correct property by setter');
     t.end();
   }, fail(t, 'should create vertex'));
 });
 
-/*
+
 test('load vertex', function (t) {
   var Vertex = db.getClass('V');
   Vertex.get(rid).then(function(hero) {
     t.ok(hero instanceof Vertex, 'should be instance of Vertex');
-    t.equal(hero.get('name'), 'batman', 'should find right vertex');
+    t.ok(hero.get('@rid'), 'should get right vertex');
+    t.equal(hero.get('@rid'), rid, 'should get right vertex');
+    t.equal(hero.get('name'), 'Batman', 'should have correct properties');
     t.end();
   }, fail(t, 'should find vertex'));
 });
