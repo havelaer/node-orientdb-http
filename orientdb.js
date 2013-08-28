@@ -33,23 +33,9 @@ exports.Connection = Base.sub('Connection', {
 
   connect: function() {
     var self = this;
-    this.connecting = Q.defer();
-    self._request.get({
-      uri: self.host + '/connect/' + self.database
-    }, function(err, response, body) {
-      if (err)
-        return self.connecting.reject(new Error(err));
-
-      if (response.statusCode < 200 || response.statusCode > 299)
-        return self.connecting.reject(response.statusCode, body);
-
-      self.info().then(function() {
-        self.connecting.resolve(body);
-      }, function(err) {
-        self.connecting.reject(err);
-      });
+    return self.get('connect').then(function() {
+      return self.info();
     });
-    return self.connecting.promise;
   },
 
   disconnect: function() {

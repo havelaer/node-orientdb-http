@@ -9,8 +9,6 @@ function fail(t, msg) { return function(err) { console.log(err); t.ok(false, msg
 
 
 test('incorrect connect', function (t) {
-  t.plan(1);
-
   var db = new OrientDb({
     host: "http://localhost:2480",
     user: "admin",
@@ -20,9 +18,9 @@ test('incorrect connect', function (t) {
 
   db.connect().then(function() {
     fail(t, 'should not connect to orientdb');
-
   }, function(statusCode, body) {
     t.equal(statusCode, 401, 'should return 401 Unauthorized');
+    t.end();
   });
 });
 
@@ -88,7 +86,7 @@ test('load vertex', function (t) {
   }, fail(t, 'should find vertex'));
 });
 
-
+/*
 test('update vertex', function (t) {
   var Vertex = db.getClass('V');
   Vertex.get(rid).then(function(hero) {
