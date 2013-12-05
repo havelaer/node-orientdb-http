@@ -1,7 +1,8 @@
 node-orientdb-http
 ==================
 
-A Node.js driver for OrientDB using the OrientDB RESTful HTTP protocol
+A Node.js driver for OrientDB using the OrientDB RESTful HTTP protocol.
+
 Very basic http wrapper using request and Q. Tested on [OrientDb](http://www.orientdb.org/) 1.6.1.
 
 ## Install
