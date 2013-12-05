@@ -1,12 +1,10 @@
 var test = require("tap").test;
 var Q = require('../node_modules/q');
-var OrientDb = require('../orientdb').Connection;
+var OrientDb = require('../orientdb');
 var config = require('../config/test');
-
 
 function pass(t, msg) { return function() { t.ok(true, msg); }; }
 function fail(t, msg) { return function(err) { console.log(err); t.ok(false, msg); t.end(); }; }
-
 
 test('incorrect connect', function (t) {
   var db = new OrientDb({
@@ -24,16 +22,22 @@ test('incorrect connect', function (t) {
   });
 });
 
-
 var db = new OrientDb(config); // globals
 var rid = null;
-
 
 test('connect', function (t) {
   db.connect().then(function() {
     t.ok(true, 'should connect to orientdb');
-    t.ok(db._classes, 'should retrieve db classes');
-    t.ok(db.getClass('E') instanceof Function, 'should be a sub of OClass');
+    t.end();
+  }, function() {
+    t.bailout('bailing out of tests, db connection failed');
+    t.end();
+  });
+});
+
+test('info', function (t) {
+  db.get('database').then(function(body) {
+    t.ok(true, 'should info from db');
     t.end();
   }, function() {
     t.bailout('bailing out of tests, db connection failed');
@@ -50,7 +54,7 @@ test('command', function (t) {
   );
 });
 
-
+/*
 test('create vertex', function (t) {
   var Vertex = db.getClass('V');
   var hero = new Vertex({ name: 'Batman' });
@@ -73,7 +77,6 @@ test('create vertex', function (t) {
     t.end();
   }, fail(t, 'should create vertex'));
 });
-
 
 test('load vertex', function (t) {
   var Vertex = db.getClass('V');
