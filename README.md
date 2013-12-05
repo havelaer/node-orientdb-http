@@ -22,7 +22,7 @@ var db = new OrientDb({
 });
 
 db.connect().then(function() {
-    // doe some stuff
+    // do some stuff
 }, function(statusCode, body) {
     // mmm error ..
 });
