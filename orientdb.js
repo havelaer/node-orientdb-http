@@ -24,20 +24,18 @@ module.exports = Base.sub('OrientDb', {
     var methods = ['post', 'get', 'put', 'delete'];
     for(var i = 0; i < methods.length; i++) {
       this[methods[i]] = (function(i) {
-        return function(command, args) {
-          return self.request(methods[i].toUpperCase(), command, args);
+        return function(command, args, body) {
+          return self.request(methods[i].toUpperCase(), command, args, body);
         };
       })(i);
     }
   },
 
   connect: function() {
-    var self = this;
-    return self.get('connect');
+    return this.get('connect');
   },
 
   disconnect: function() {
-    var self = this;
     var deferred = Q.defer();
 
     request.get(this.host + '/disconnect', function(err, response, body) {
