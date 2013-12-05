@@ -10,12 +10,6 @@ First install [OrientDb](http://www.orientdb.org/).
 npm install node-orientdb-http
 ```
 
-## Test
-Create a test database and configure config/test.js
-```
-npm test
-```
-
 ## Connect
 ```
 var db = new OrientDb({
