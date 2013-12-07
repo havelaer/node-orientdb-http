@@ -25,7 +25,7 @@ db.on('connect', function() {
     // yes! connected
 });
 
-db.on('error', function(statusCode, body) {
+db.on('error', function(err) {
     // mmm error ..
 });
 ```
