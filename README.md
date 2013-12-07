@@ -31,6 +31,13 @@ db.on('error', function(err) {
 ```
 
 ## Play
+See [OrientDB-REST](https://github.com/orientechnologies/orientdb/wiki/OrientDB-REST) for more docs.
 ```
-db.command("insert into V set name = 'Batman'").then(successHandler, errorHandler);
+db.command('insert into V set name = "Batman"').then(successHandler, errorHandler);
+
+var d = { '@class': 'V', name: 'Robin'};
+db.post('document', null, d).then(successHandler, errorHandler);
+
+db.delete('document', '9:1').then(successHandler, errorHandler);
+
 ```
