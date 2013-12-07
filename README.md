@@ -12,18 +12,20 @@ npm install node-orientdb-http
 
 ## Connect
 ```
-var OrientDb = require('node-orientdb-http');
+var orientdb = require('node-orientdb-http');
 
-var db = new OrientDb({
+var db = orientdb.connect({
     host: "http://localhost:2480",
     user: "admin",
     password: "admin",
     database: "test"
 });
 
-db.connect().then(function() {
-    // do some stuff
-}, function(statusCode, body) {
+db.on('connect', function() {
+    // yes! connected
+});
+
+db.on('error', function(statusCode, body) {
     // mmm error ..
 });
 ```

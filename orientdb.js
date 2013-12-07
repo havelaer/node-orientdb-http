@@ -8,7 +8,7 @@ var Q = require('q');
  * @constructor
  * @parent Base
  */
-module.exports = Base.sub('OrientDb', {
+var Connection = Base.sub('Connection', {
 
   init: function() {
     var self = this;
@@ -32,28 +32,27 @@ module.exports = Base.sub('OrientDb', {
   },
 
   connect: function() {
-    return this.get('connect');
+    var self = this;
+    this.get('connect').then(function () {
+      self.trigger('connect');
+    }, function (err) {
+      self.trigger('error', err);
+    });
+    return this;
   },
 
   disconnect: function() {
-    var deferred = Q.defer();
-
+    var self = this;
     request.get(this.host + '/disconnect', function(err, response, body) {
-      if (err) return deferred.reject(err);
-
-      deferred.resolve(body);
+      if (err) return self.trigger('error', err);
+      self.trigger('disconnect');
     });
-    return deferred.promise;
-  },
-
-  getClass: function(name) {
-    return this._classes[name];
+    return this;
   },
 
   request: function(method, command, args, body) {
     var d = Q.defer();
     var url = this.host + '/' + command + '/' + this.database + (args ? '/' + args : '');
-    console.log(url);
     this._request({
       method: method,
       url: url,
@@ -79,3 +78,13 @@ module.exports = Base.sub('OrientDb', {
   }
 
 });
+
+/**
+ * public connect method
+ * creates new connection instance
+ */
+exports.connect = function (config, callback) {
+  var db = new Connection(config);
+  db.connect();
+  return db;
+};

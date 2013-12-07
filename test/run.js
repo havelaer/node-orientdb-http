@@ -1,35 +1,41 @@
 var test = require("tap").test;
-var Q = require('../node_modules/q');
-var OrientDb = require('../orientdb');
+var orientdb = require('../orientdb');
 var config = require('../config/test');
 
 function pass(t, msg) { return function() { t.ok(true, msg); }; }
 function fail(t, msg) { return function(err) { console.log(err); t.ok(false, msg); t.end(); }; }
 
 test('incorrect connect', function (t) {
-  var db = new OrientDb({
+  t.plan(1);
+  var db = orientdb.connect({
     host: "http://localhost:2480",
     user: "admin",
     password: "wrong password",
     database: "blog"
   });
 
-  db.connect().then(function() {
-    fail(t, 'should not connect to orientdb');
-  }, function(statusCode, body) {
-    t.equal(statusCode, 401, 'should return 401 Unauthorized');
+  db.on('connect', function() {
+    t.ok(false, 'should not connect to orientdb');
+  });
+
+  db.on('error', function(err) {
+    t.ok(err, 'should return Error');
     t.end();
   });
 });
 
-var db = new OrientDb(config); // globals
+var db; // globals
 var rid = null;
 
 test('connect', function (t) {
-  db.connect().then(function() {
+  db = orientdb.connect(config);
+
+  db.on('connect', function() {
     t.ok(true, 'should connect to orientdb');
     t.end();
-  }, function() {
+  });
+
+  db.on('error', function() {
     t.bailout('bailing out of tests, db connection failed');
     t.end();
   });
@@ -99,11 +105,12 @@ test('document', function (t) {
 });
 
 test('disconnect', function (t) {
-  db.disconnect().then(function() {
+  t.plan(1);
+
+  db.disconnect();
+
+  db.on('disconnect', function() {
     t.ok(true, 'should disconnect');
-    t.end();
-  }, function() {
-    t.ok(false, 'should disconnect');
     t.end();
   });
 });
