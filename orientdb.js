@@ -70,11 +70,11 @@ var Connection = Base.sub('Connection', {
   },
 
   command: function(query, limit, fetchplan) {
-    return this.post('command', 'sql/' + query + (limit ? '/' + limit + (fetchplan ? '/' + fetchplan : '') : ''));
+    return this.post('command', 'sql/' + encodeURIComponent(query) + (limit ? '/' + limit + (fetchplan ? '/' + fetchplan : '') : ''));
   },
 
   query: function(query, limit, fetchplan) {
-    return this.get('query', 'sql/' + query + (limit ? '/' + limit + (fetchplan ? '/' + fetchplan : '') : ''));
+    return this.get('query', 'sql/' + encodeURIComponent(query) + (limit ? '/' + limit + (fetchplan ? '/' + fetchplan : '') : ''));
   }
 
 });
