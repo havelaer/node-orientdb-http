@@ -1,6 +1,6 @@
 {
   "name": "node-orientdb-http",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A node.js driver for OrientDB using the OrientDB RESTful HTTP protocol",
   "main": "orientdb.js",
   "scripts": {

@@ -46,3 +46,13 @@ db.command('insert into V set name = "Batman"').then(successHandler, errorHandle
 
 db.query('select * from V where name = "Batman"').then(successHandler, errorHandler);
 ```
+
+## Changelog
+
+0.1.1 
+
+* encodeURIComponent for complexe request against OrientDB (@welcoMattic)
+
+0.1.0
+
+* First Release
