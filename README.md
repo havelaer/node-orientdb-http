@@ -45,6 +45,9 @@ db.delete('document', '9:1').then(successHandler, errorHandler);
 db.command('insert into V set name = "Batman"').then(successHandler, errorHandler);
 
 db.query('select * from V where name = "Batman"').then(successHandler, errorHandler);
+
+
+db.language('gremlin').query("g.V('@class', 'User')").then(successHandler2, errorHandler2);
 ```
 
 ## Changelog
