@@ -62,7 +62,7 @@ var Connection = Base.sub('Connection', {
       if (err) return d.reject(err);
 
       if (response.statusCode < 200 || response.statusCode > 299)
-        return d.reject(response.statusCode, body);
+        return d.reject({statusCode: response.statusCode, error: body});
 
       d.resolve(body);
     });
