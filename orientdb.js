@@ -74,9 +74,9 @@ var Connection = Base.sub('Connection', {
     return this;
   },
 
-  command: function(query, limit, fetchplan) {
+  command: function(command) {
     var language = this._language || 'sql';
-    return this.post('command', language + '/' + encodeURIComponent(query) + (limit ? '/' + limit + (fetchplan ? '/' + fetchplan : '') : ''));
+    return this.post('command', language, command);
   },
 
   query: function(query, limit, fetchplan) {
