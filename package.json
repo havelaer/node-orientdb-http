@@ -10,7 +10,7 @@
     "tap": "~0.2.4"
   },
   "dependencies": {
-    "request": "*",
+    "request": "2.34.0",
     "q": "~0.9.6"
   },
   "repository": "git@github.com:Havelaer/node-orientdb-http.git",

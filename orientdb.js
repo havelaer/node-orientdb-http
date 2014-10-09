@@ -62,19 +62,26 @@ var Connection = Base.sub('Connection', {
       if (err) return d.reject(err);
 
       if (response.statusCode < 200 || response.statusCode > 299)
-        return d.reject(response.statusCode, body);
+        return d.reject({statusCode: response.statusCode, error: body});
 
       d.resolve(body);
     });
     return d.promise;
   },
 
-  command: function(query, limit, fetchplan) {
-    return this.post('command', 'sql/' + encodeURIComponent(query) + (limit ? '/' + limit + (fetchplan ? '/' + fetchplan : '') : ''));
+  language: function(language) {
+    this._language = language;
+    return this;
+  },
+
+  command: function(command) {
+    var language = this._language || 'sql';
+    return this.post('command', language, command);
   },
 
   query: function(query, limit, fetchplan) {
-    return this.get('query', 'sql/' + encodeURIComponent(query) + (limit ? '/' + limit + (fetchplan ? '/' + fetchplan : '') : ''));
+    var language = this._language || 'sql';
+    return this.get('query', language + '/' + encodeURIComponent(query) + (limit ? '/' + limit + (fetchplan ? '/' + fetchplan : '') : ''));
   }
 
 });
